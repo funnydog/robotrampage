@@ -18,6 +18,35 @@ deps = [
 
 srcs = [
   'robotrampage.cpp',
+  'application.cpp',
+
+  # views
+  'viewstack.cpp',
+
+  # graphics
+  'camera.cpp',
+  'eventqueue.cpp',
+  'font.cpp',
+  'rendertarget.cpp',
+  'shader.cpp',
+  'texture.cpp',
+  'window.cpp',
+
+  # audio
+  'audiodevice.cpp',
+  'soundfile.cpp',
+  'soundfilewav.cpp',
+  'soundfileogg.cpp',
+  'soundbuffer.cpp',
+  'soundsource.cpp',
+  'sound.cpp',
+  'soundplayer.cpp',
+
+  # utilities / third party
+  'alcheck.cpp',
+  'glcheck.cpp',
+  'stb_image.cpp',
+  'utility.cpp',
 ]
 
 exe = executable(
