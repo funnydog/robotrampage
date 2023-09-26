@@ -5,6 +5,8 @@
 
 #include "application.hpp"
 
+#include "gameview.hpp"
+
 namespace
 {
 const std::uint64_t targetFPS = 60;
@@ -47,7 +49,7 @@ Application::Application()
 	registerViews();
 
 	// TODO: push the starting view
-	mViewStack.pushView(ViewID::Title);
+	mViewStack.pushView(ViewID::Playing);
 	mViewStack.update(0.f);
 }
 
@@ -68,6 +70,7 @@ Application::loadAssets()
 void
 Application::registerViews()
 {
+	mViewStack.registerView<GameView>(ViewID::Playing);
 }
 
 void
@@ -106,11 +109,10 @@ Application::run()
 
 			processInput();
 
-			// TODO: update the game state
+			mViewStack.update(SecondsPerFrame);
 		}
 
-		// TODO: render the game state
-
+		mViewStack.render(mRenderTarget);
 		mWindow.display();
 	}
 }

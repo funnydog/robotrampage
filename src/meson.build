@@ -22,6 +22,7 @@ srcs = [
 
   # views
   'viewstack.cpp',
+  'gameview.cpp',
 
   # graphics
   'camera.cpp',
