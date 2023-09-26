@@ -37,7 +37,7 @@ ResourceHolder<Resource, Identifier>::load(
 	if (!resPtr->loadFromFile(path, std::forward<Args>(args)...))
 	{
 		throw std::runtime_error("ResourceHolder::load(): "
-					 "Failed to load " + path.string());
+					 "Failed to load \"" + path.string() + "\"");
 	}
 	add(id, std::move(resPtr));
 }
