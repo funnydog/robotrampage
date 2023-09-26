@@ -29,6 +29,7 @@ srcs = [
   'font.cpp',
   'rendertarget.cpp',
   'shader.cpp',
+  'sprite.cpp',
   'texture.cpp',
   'window.cpp',
 
