@@ -132,7 +132,7 @@ private:
 
 private:
 	Camera mDefaultCamera;
-	Camera mCamera;
+	const Camera *mCamera;
 
 	std::vector<Vertex>        mVertices;
 	std::vector<std::uint16_t> mIndices;

@@ -48,7 +48,8 @@ static const std::uint16_t QuadIndices[] = { 0, 1, 2, 1, 3, 2 };
 }
 
 RenderTarget::RenderTarget()
-	: mIsBatching(false)
+	: mCamera(&mDefaultCamera)
+	, mIsBatching(false)
 	, mChannelList(nullptr)
 	, mChannelTail(&mChannelList)
 	, mCurrent(nullptr)
@@ -94,9 +95,9 @@ RenderTarget::use(const Window &window)
 	mShader.link();
 
 	glm::vec2 size = window.getSize();
-	mDefaultCamera.setCenter(size * 0.5f);
+	mDefaultCamera.setPosition({0.f, 0.f});
 	mDefaultCamera.setSize(size);
-	mCamera = mDefaultCamera;
+	mCamera = &mDefaultCamera;
 
 	glCheck(glEnable(GL_CULL_FACE));
 	glCheck(glEnable(GL_BLEND));
@@ -115,13 +116,13 @@ RenderTarget::getDefaultCamera() const
 const Camera&
 RenderTarget::getCamera() const
 {
-	return mCamera;
+	return *mCamera;
 }
 
 void
 RenderTarget::setCamera(const Camera &view)
 {
-	mCamera = view;
+	mCamera = &view;
 }
 
 void
@@ -188,7 +189,7 @@ RenderTarget::draw()
 	ShaderUniform sampler = mShader.getUniform("Texture");
 
 	sampler.set(textureUnit);
-	projection.set(mCamera.getTransform());
+	projection.set(mCamera->getTransform());
 
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, mVBO));
 	glCheck(glBufferData(GL_ARRAY_BUFFER,
@@ -359,6 +360,10 @@ RenderTarget::blitQuad(
 	const FloatRect &dstRect,
 	Color color)
 {
+	if (!mCamera->isVisible(dstRect))
+	{
+		return;
+	}
 	setTexture(&texture);
 	auto base = getPrimIndex(6, 4);
 	addIndices(base, QuadIndices + 0, QuadIndices + 6);
