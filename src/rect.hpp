@@ -13,7 +13,7 @@ struct Rect
 	explicit Rect(const Rect<U> &rectangle);
 
 	bool contains(T point) const;
-	bool intersect(const Rect<T> &other);
+	bool intersect(const Rect<T> &other) const;
 
 	T pos;
 	T size;
@@ -56,7 +56,7 @@ Rect<T>::contains(T point) const
 
 template <typename T>
 bool
-Rect<T>::intersect(const Rect<T> &other)
+Rect<T>::intersect(const Rect<T> &other) const
 {
 	return pos.x < other.pos.x + other.size.x
 		&& pos.x + size.x > other.pos.x
