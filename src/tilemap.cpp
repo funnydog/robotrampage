@@ -3,6 +3,7 @@
 
 #include "rendertarget.hpp"
 #include "tilemap.hpp"
+#include "utility.hpp"
 
 TileMap::TileMap(const Texture &texture, unsigned width, unsigned height)
 	: mMap(width * height, 0)
@@ -92,6 +93,40 @@ bool
 TileMap::isWallTileByPixel(glm::vec2 pixelPos) const
 {
 	return isWallTile(getSquareByPixel(pixelPos));
+}
+
+void
+TileMap::generateRandomMap()
+{
+	const int wallChancePerSquare = 10;
+
+	int floorTile = Utility::randomInt(4);
+	int wallTile  = 4 + Utility::randomInt(4);
+
+	for (int y = 0; y < mMapTileSize.y; y++)
+	{
+		for (int x = 0; x < mMapTileSize.x; x++)
+		{
+			auto &tile = mMap[y * mMapTileSize.x + x];
+
+			if (x == 0 || y == 0 || x == mMapTileSize.x - 1 || y == mMapTileSize.y-1)
+			{
+				tile = wallTile;
+			}
+			else if (x == 1 || y == 1 || x == mMapTileSize.x-2 || y == mMapTileSize.y-2)
+			{
+				tile = floorTile;
+			}
+			else if (Utility::randomInt(100) <= wallChancePerSquare)
+			{
+				tile = wallTile;
+			}
+			else
+			{
+				tile = floorTile;
+			}
+		}
+	}
 }
 
 void

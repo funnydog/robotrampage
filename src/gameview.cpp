@@ -32,6 +32,7 @@ GameView::GameView(ViewStack &stack, const Context &context)
 	mTileMap.addTile({{32.f, 32.f}, {32.f, 32.f}});
 	mTileMap.addTile({{64.f, 32.f}, {32.f, 32.f}});
 	mTileMap.addTile({{96.f, 32.f}, {32.f, 32.f}});
+	mTileMap.generateRandomMap();
 }
 
 bool

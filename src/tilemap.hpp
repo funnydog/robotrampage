@@ -30,6 +30,8 @@ public:
 	bool isWallTile(glm::ivec2 squarePos) const;
 	bool isWallTileByPixel(glm::vec2 pixelPos) const;
 
+	void generateRandomMap();
+
 	void draw(RenderTarget &target);
 
 private:
