@@ -30,9 +30,6 @@ public:
 	void rotate(float angle);
 	void scale(float factor);
 
-	glm::vec2 transform(glm::vec2 point);
-	FloatRect transform(const FloatRect &rectangle);
-
 	const glm::mat4& getTransform() const;
 	const glm::mat4& getInverse() const;
 
@@ -40,7 +37,6 @@ private:
 	FloatRect mWorldRectangle;
 	glm::vec2 mPositionMin;
 	glm::vec2 mPositionMax;
-	glm::vec2 mPosition;
 	glm::vec2 mSize;
 	float     mRotation;
 	FloatRect mViewport;

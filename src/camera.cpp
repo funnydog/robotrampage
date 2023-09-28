@@ -7,7 +7,6 @@ Camera::Camera(glm::vec2 position, glm::vec2 size)
 	: mWorldRectangle(position, size)
 	, mPositionMin(position)
 	, mPositionMax(position)
-	, mPosition(position)
 	, mSize(size)
 	, mRotation(0.f)
 	, mViewport(position, size)
@@ -20,13 +19,13 @@ Camera::Camera(glm::vec2 position, glm::vec2 size)
 glm::vec2
 Camera::getPosition() const
 {
-	return mPosition;
+	return mViewport.pos;
 }
 
 void
 Camera::setPosition(glm::vec2 position)
 {
-	mPosition = glm::clamp(position, mPositionMin, mPositionMax);
+	mViewport.pos = glm::clamp(position, mPositionMin, mPositionMax);
 	mTransformNeedsUpdate = true;
 	mInverseNeedsUpdate = true;
 }
@@ -43,6 +42,7 @@ Camera::setWorldRectangle(const FloatRect &worldRect)
 	mWorldRectangle = worldRect;
 	mPositionMin = mWorldRectangle.pos;
 	mPositionMax = mWorldRectangle.pos + mWorldRectangle.size - mViewport.size;
+	setPosition(getPosition());
 }
 
 glm::vec2
@@ -96,7 +96,7 @@ Camera::isVisible(const FloatRect &bounds) const
 void
 Camera::move(glm::vec2 offset)
 {
-	setPosition(mPosition + offset);
+	setPosition(getPosition() + offset);
 }
 
 void
@@ -111,23 +111,6 @@ Camera::scale(float factor)
 	setSize(mSize * factor);
 }
 
-glm::vec2
-Camera::transform(glm::vec2 point)
-{
-	// TODO: we ignore scale and rotation
-	return point - mPosition;
-}
-
-FloatRect
-Camera::transform(const FloatRect &rectangle)
-{
-	// TODO: we ignore scale and rotation
-	return {
-		rectangle.pos - mPosition,
-		rectangle.size,
-	};
-}
-
 const glm::mat4&
 Camera::getTransform() const
 {
@@ -135,7 +118,7 @@ Camera::getTransform() const
 	{
 		mTransformNeedsUpdate = false;
 
-		const glm::vec2 center = mSize * 0.5f + mPosition;
+		const glm::vec2 center = mSize * 0.5f + getPosition();
 		const float angle = glm::radians(mRotation);
 		const float cos = std::cos(angle);
 		const float sin = std::sin(angle);
