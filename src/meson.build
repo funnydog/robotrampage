@@ -31,6 +31,7 @@ srcs = [
   'rendertarget.cpp',
   'shader.cpp',
   'sprite.cpp',
+  'tilemap.cpp',
   'texture.cpp',
   'window.cpp',
 
