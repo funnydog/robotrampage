@@ -4,6 +4,7 @@
 #include "viewstack.hpp"
 
 #include "camera.hpp"
+#include "player.hpp"
 #include "sprite.hpp"
 #include "tilemap.hpp"
 #include "window.hpp"
@@ -22,7 +23,6 @@ private:
 	ViewStack &mViewStack;
 	Window &mWindow;
 	Camera mCamera;
-	Sprite mSprite1;
-	Sprite mSprite2;
+	Player mPlayer;
 	TileMap mTileMap;
 };
