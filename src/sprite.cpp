@@ -14,6 +14,7 @@ Sprite::Sprite(
 	, mFrameIndex(0)
 	, mFrameElapsed(0.f)
 	, mFrameDelay(0.1f)
+	, mAnimated(true)
 	, mLocation(location)
 	, mVelocity(velocity)
 	, mRotation(0.f)
@@ -149,6 +150,18 @@ Sprite::setCollisionRadius(float radius)
 	mCollisionRadius = radius;
 }
 
+bool
+Sprite::isAnimated() const
+{
+	return mAnimated;
+}
+
+void
+Sprite::setAnimated(bool animated)
+{
+	mAnimated = animated;
+}
+
 void
 Sprite::addFrame(const FloatRect &rect)
 {
@@ -158,8 +171,7 @@ Sprite::addFrame(const FloatRect &rect)
 void
 Sprite::update(float dt)
 {
-	mFrameElapsed += dt;
-	if (mFrameElapsed >= mFrameDelay)
+	if (mAnimated && (mFrameElapsed += dt) > mFrameDelay)
 	{
 		mFrameElapsed -= mFrameDelay;
 		mFrameIndex++;

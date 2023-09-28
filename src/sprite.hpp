@@ -44,6 +44,9 @@ public:
 	float getCollisionRadius() const;
 	void setCollisionRadius(float radius);
 
+	bool isAnimated() const;
+	void setAnimated(bool animated);
+
 	void addFrame(const FloatRect &rect);
 
 	virtual void update(float dt);
@@ -61,6 +64,7 @@ protected:
 	unsigned mFrameIndex;
 	float mFrameElapsed;
 	float mFrameDelay;
+	bool mAnimated;
 
 	// position
 	glm::vec2 mLocation;
