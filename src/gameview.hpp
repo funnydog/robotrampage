@@ -5,6 +5,7 @@
 
 #include "camera.hpp"
 #include "sprite.hpp"
+#include "tilemap.hpp"
 #include "window.hpp"
 
 class GameView: public View
@@ -23,4 +24,5 @@ private:
 	Camera mCamera;
 	Sprite mSprite1;
 	Sprite mSprite2;
+	TileMap mTileMap;
 };

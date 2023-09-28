@@ -18,9 +18,20 @@ GameView::GameView(ViewStack &stack, const Context &context)
 	, mSprite2(
 		context.textures->get(TextureID::SpriteSheet), {{0, 160}, {32, 32}},
 		glm::vec2(200.f, 200.f), glm::vec2(0.f))
+	, mTileMap(
+		context.textures->get(TextureID::SpriteSheet), 50, 50)
 {
 	mCamera.setWorldRectangle({{0.f, 0.f}, {1600.f, 1600.f}});
 	context.target->setCamera(mCamera);
+
+	mTileMap.addTile({{0.f, 0.f}, {32.f, 32.f}});
+	mTileMap.addTile({{32.f, 0.f}, {32.f, 32.f}});
+	mTileMap.addTile({{64.f, 0.f}, {32.f, 32.f}});
+	mTileMap.addTile({{96.f, 0.f}, {32.f, 32.f}});
+	mTileMap.addTile({{0.f, 32.f}, {32.f, 32.f}});
+	mTileMap.addTile({{32.f, 32.f}, {32.f, 32.f}});
+	mTileMap.addTile({{64.f, 32.f}, {32.f, 32.f}});
+	mTileMap.addTile({{96.f, 32.f}, {32.f, 32.f}});
 }
 
 bool
@@ -58,6 +69,7 @@ void
 GameView::render(RenderTarget &target)
 {
 	target.clear(Color::White);
+	mTileMap.draw(target);
 	mSprite1.draw(target);
 	mSprite2.draw(target);
 	target.draw();
