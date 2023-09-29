@@ -14,7 +14,9 @@ Sprite::Sprite(
 	, mFrameIndex(0)
 	, mFrameElapsed(0.f)
 	, mFrameDelay(0.1f)
+	, mExpired(false)
 	, mAnimated(true)
+	, mAnimatedWhenStopped(true)
 	, mLocation(location)
 	, mVelocity(velocity)
 	, mRotation(0.f)
@@ -150,6 +152,30 @@ Sprite::setCollisionRadius(float radius)
 	mCollisionRadius = radius;
 }
 
+glm::vec2
+Sprite::getBoundingPadding() const
+{
+	return mBoundingPadding;
+}
+
+void
+Sprite::setBoundingPadding(glm::vec2 padding)
+{
+	mBoundingPadding = padding;
+}
+
+bool
+Sprite::isExpired() const
+{
+	return mExpired;
+}
+
+void
+Sprite::setExpired(bool expired)
+{
+	mExpired = expired;
+}
+
 bool
 Sprite::isAnimated() const
 {
@@ -162,6 +188,18 @@ Sprite::setAnimated(bool animated)
 	mAnimated = animated;
 }
 
+bool
+Sprite::isAnimatedWhenStopped() const
+{
+	return mAnimatedWhenStopped;
+}
+
+void
+Sprite::setAnimatedWhenStopped(bool animatedWhenStopped)
+{
+	mAnimatedWhenStopped = animatedWhenStopped;
+}
+
 void
 Sprite::addFrame(const FloatRect &rect)
 {
@@ -171,16 +209,19 @@ Sprite::addFrame(const FloatRect &rect)
 void
 Sprite::update(float dt)
 {
-	if (mAnimated && (mFrameElapsed += dt) > mFrameDelay)
+	if (!mExpired && (mFrameElapsed += dt) >= mFrameDelay)
 	{
 		mFrameElapsed -= mFrameDelay;
-		mFrameIndex++;
-		if (mFrameIndex >= mFrames.size())
+		if (mAnimated && (mAnimatedWhenStopped || mVelocity != glm::vec2(0.f)))
 		{
-			mFrameIndex = 0;
+			mFrameIndex++;
+			if (mFrameIndex >= mFrames.size())
+			{
+				mFrameIndex = 0;
+			}
 		}
+		mLocation += mVelocity * dt;
 	}
-	mLocation += mVelocity * dt;
 }
 
 void

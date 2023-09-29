@@ -44,8 +44,17 @@ public:
 	float getCollisionRadius() const;
 	void setCollisionRadius(float radius);
 
+	glm::vec2 getBoundingPadding() const;
+	void setBoundingPadding(glm::vec2 padding);
+
+	bool isExpired() const;
+	void setExpired(bool expired);
+
 	bool isAnimated() const;
 	void setAnimated(bool animated);
+
+	bool isAnimatedWhenStopped() const;
+	void setAnimatedWhenStopped(bool animatedWhenStopped);
 
 	void addFrame(const FloatRect &rect);
 
@@ -64,7 +73,9 @@ protected:
 	unsigned mFrameIndex;
 	float mFrameElapsed;
 	float mFrameDelay;
+	bool mExpired;
 	bool mAnimated;
+	bool mAnimatedWhenStopped;
 
 	// position
 	glm::vec2 mLocation;
