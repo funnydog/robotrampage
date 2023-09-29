@@ -26,6 +26,7 @@ public:
 
 	float getRotation() const;
 	void setRotation(float rotation);
+	void rotateTo(glm::vec2 direction);
 
 	unsigned getFrameIndex() const;
 	void setFrameIndex(unsigned frame);

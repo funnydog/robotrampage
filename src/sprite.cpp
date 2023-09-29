@@ -74,6 +74,12 @@ Sprite::setRotation(float rotation)
 	mRotation = rotation;
 }
 
+void
+Sprite::rotateTo(glm::vec2 direction)
+{
+	mRotation = glm::atan(direction.y, direction.x);
+}
+
 unsigned
 Sprite::getFrameIndex() const
 {
