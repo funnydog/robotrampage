@@ -37,7 +37,7 @@ GameView::GameView(ViewStack &stack, const Context &context)
 bool
 GameView::update(float dt)
 {
-	mPlayer.update(dt);
+	mPlayer.update(mWindow, dt);
 	return true;
 }
 
