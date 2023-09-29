@@ -8,6 +8,8 @@ Player::Player(
 	: mBaseSprite(texture, baseRect, worldLocation, glm::vec2(0.f))
 	, mTurretSprite(texture, turretRect, worldLocation, glm::vec2(0.f))
 {
+	mBaseSprite.setBoundingPadding({4.f, 4.f});
+	mBaseSprite.setAnimatedWhenStopped(false);
 	FloatRect rect = baseRect;
 	for (; baseCount > 1; baseCount--)
 	{
@@ -15,14 +17,13 @@ Player::Player(
 		mBaseSprite.addFrame(rect);
 	}
 
+	mTurretSprite.setAnimated(false);
 	rect = turretRect;
 	for (; turretCount > 1; turretCount--)
 	{
 		rect.pos.x += rect.size.x;
 		mTurretSprite.addFrame(rect);
 	}
-
-	mBaseSprite.setAnimated(false);
 }
 
 void
