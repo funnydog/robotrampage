@@ -39,6 +39,12 @@ Sprite::setLocation(glm::vec2 location)
 }
 
 glm::vec2
+Sprite::getSize() const
+{
+	return mFrameSize;
+}
+
+glm::vec2
 Sprite::getVelocity() const
 {
 	return mVelocity;

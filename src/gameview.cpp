@@ -13,6 +13,7 @@ GameView::GameView(ViewStack &stack, const Context &context)
 	, mWindow(*context.window)
 	, mCamera({0.f, 0.f}, context.window->getSize())
 	, mPlayer(
+		mCamera,
 		context.textures->get(TextureID::SpriteSheet),
 		{{0, 64}, {32, 32}}, 6,
 		{{0, 96}, {32, 32}}, 1,

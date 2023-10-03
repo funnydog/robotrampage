@@ -18,6 +18,8 @@ public:
 	glm::vec2 getLocation() const;
 	void setLocation(glm::vec2 location);
 
+	glm::vec2 getSize() const;
+
 	glm::vec2 getVelocity() const;
 	void setVelocity(glm::vec2 velocity);
 

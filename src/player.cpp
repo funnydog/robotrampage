@@ -2,19 +2,23 @@
 
 #include "player.hpp"
 
+#include "camera.hpp"
 #include "window.hpp"
 
 namespace
 {
-static const float PlayerSpeed = 90.f;
+static const float PlayerSpeed = 200.f;
+static const FloatRect ScrollArea({150.f, 100.f}, {500.f, 400.f});
 }
 
 Player::Player(
+	Camera &camera,
 	const Texture &texture,
 	const FloatRect &baseRect, unsigned baseCount,
 	const FloatRect &turretRect, unsigned turretCount,
 	glm::vec2 worldLocation)
-	: mBaseSprite(texture, baseRect, worldLocation, glm::vec2(0.f))
+	: mCamera(camera)
+	, mBaseSprite(texture, baseRect, worldLocation, glm::vec2(0.f))
 	, mTurretSprite(texture, turretRect, worldLocation, glm::vec2(0.f))
 	, mBaseAngle(0.f)
 	, mTurretAngle(0.f)
@@ -40,8 +44,9 @@ Player::Player(
 void
 Player::update(Window &window, float dt)
 {
-	handleInput(window);
+	handleInput(dt, window);
 	mBaseSprite.update(dt);
+	clampToWorld();
 	mTurretSprite.setLocation(mBaseSprite.getLocation());
 }
 
@@ -53,7 +58,7 @@ Player::draw(RenderTarget &target)
 }
 
 void
-Player::handleInput(Window &window)
+Player::handleInput(float dt, Window &window)
 {
 	glm::vec2 moveAngle(0.f);
 	moveAngle += handleKeyboardMovements(window);
@@ -78,6 +83,8 @@ Player::handleInput(Window &window)
 	}
 
 	mBaseSprite.setVelocity(moveAngle * PlayerSpeed);
+
+	repositionCamera(dt, moveAngle);
 }
 
 glm::vec2
@@ -131,4 +138,47 @@ Player::handleKeyboardShots(Window &window)
 		return {1.f, -1.f};
 	}
 	return {0.f, 0.f};
+}
+
+void
+Player::clampToWorld()
+{
+	auto rect = mCamera.getWorldRectangle();
+	mBaseSprite.setLocation(
+		glm::clamp(mBaseSprite.getLocation(),
+			   rect.pos,
+			   rect.pos + rect.size - mBaseSprite.getSize()));
+}
+
+void
+Player::repositionCamera(float dt, glm::vec2 angle)
+{
+	angle *= PlayerSpeed * dt;
+
+	auto baseScreenStart = mBaseSprite.getLocation() - mCamera.getPosition();
+	auto baseScreenEnd = baseScreenStart + mBaseSprite.getSize();
+
+	if ((baseScreenStart.x < ScrollArea.pos.x)
+	    && angle.x < 0.f)
+	{
+		mCamera.move(glm::vec2(angle.x, 0.f));
+	}
+
+	if ((baseScreenEnd.x > ScrollArea.pos.x + ScrollArea.size.x)
+	    && angle.x > 0.f)
+	{
+		mCamera.move(glm::vec2(angle.x, 0.f));
+	}
+
+	if ((baseScreenStart.y < ScrollArea.pos.y)
+	    && angle.y < 0.f)
+	{
+		mCamera.move(glm::vec2(0.f, angle.y));
+	}
+
+	if ((baseScreenEnd.y > ScrollArea.pos.y + ScrollArea.size.y)
+	    && angle.y > 0.f)
+	{
+		mCamera.move(glm::vec2(0.f, angle.y));
+	}
 }
