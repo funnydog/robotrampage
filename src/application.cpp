@@ -85,9 +85,12 @@ Application::processInput()
 	Event event;
 	while (mEventQueue.pop(event))
 	{
-		// TODO: forward the event to the current game state
-		if (const auto ep(std::get_if<KeyPressed>(&event)); ep
-		    && ep->key == GLFW_KEY_ESCAPE)
+		if (mViewStack.handleEvent(event))
+		{
+			// event handled by the view
+		}
+		else if (const auto ep(std::get_if<KeyPressed>(&event)); ep
+		         && ep->key == GLFW_KEY_ESCAPE)
 		{
 			mWindow.close();
 		}
