@@ -9,6 +9,7 @@
 #include "color.hpp"
 #include "font.hpp"
 #include "glcheck.hpp"
+#include "sprite.hpp"
 #include "tilemap.hpp"
 #include "window.hpp"
 
@@ -249,6 +250,45 @@ RenderTarget::draw(const std::string &text, Font &font, glm::vec2 pos, Color col
 }
 
 void
+RenderTarget::draw(const Sprite &sprite)
+{
+	setTexture(&sprite.getTexture());
+	reserve(4, QuadIndices);
+	const auto &uvRect = sprite.getSource();
+	FloatRect dstRect = sprite.getDestination();
+	Color color = sprite.getTintColor();
+	float rotation = sprite.getRotation();
+	if (rotation == 0.f)
+	{
+		for (auto unit : QuadUnits)
+		{
+			mVertices.emplace_back(
+				unit * dstRect.size + dstRect.pos,
+				unit * uvRect.size + uvRect.pos,
+				color);
+		}
+	}
+	else
+	{
+		glm::vec2 offset = sprite.getSize() * .5f;
+		auto mat4 = glm::translate(
+			glm::rotate(
+				glm::translate(glm::mat4(1.f), glm::vec3(offset, 0.f)),
+				rotation,
+				glm::vec3(0.f, 0.f, 1.f)),
+			glm::vec3(-offset, 0.f));
+		for (auto unit : QuadUnits)
+		{
+			mVertices.emplace_back(
+				glm::vec2(mat4 * glm::vec4(unit * dstRect.size, 0.f, 1.f)) + dstRect.pos,
+				unit * uvRect.size + uvRect.pos,
+				color);
+
+		}
+	}
+}
+
+void
 RenderTarget::draw(const TileMap &map)
 {
 	glm::vec2 cameraStart = mCamera->getPosition();
@@ -278,57 +318,5 @@ RenderTarget::draw(const TileMap &map)
 					Color::White);
 			}
 		}
-	}
-}
-
-void
-RenderTarget::blitQuad(const Texture &texture,
-                       const FloatRect &srcRect,
-                       const FloatRect &dstRect,
-                       Color color)
-{
-	if (mCamera->isVisible(dstRect))
-	{
-		setTexture(&texture);
-		reserve(4, QuadIndices);
-		for (auto unit : QuadUnits)
-		{
-			mVertices.emplace_back(
-				unit * dstRect.size + dstRect.pos,
-				unit * srcRect.size + srcRect.pos,
-				color);
-		}
-	}
-}
-
-void
-RenderTarget::blitQuad(const Texture &texture,
-                       const FloatRect &srcRect,
-                       const FloatRect &dstRect,
-                       Color color,
-                       float rotationAngle,
-                       glm::vec2 offset,
-                       float scale)
-{
-	auto mat4 = glm::translate(
-		glm::rotate(
-			glm::translate(
-				glm::scale(
-					glm::mat4(1.f),
-					glm::vec3(scale, scale, 1.f)),
-				glm::vec3(offset, 0.f)),
-			rotationAngle,
-			glm::vec3(0.f, 0.f, 1.f)),
-		glm::vec3(-offset, 0.f));
-
-	setTexture(&texture);
-	reserve(4, QuadIndices);
-	for (auto unit : QuadUnits)
-	{
-		mVertices.emplace_back(
-			glm::vec2(
-				mat4 * glm::vec4(unit * dstRect.size, 0.f, 1.f)) + dstRect.pos,
-			unit * srcRect.size + srcRect.pos,
-			color);
 	}
 }

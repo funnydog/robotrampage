@@ -12,6 +12,7 @@
 
 class Canvas;
 class Font;
+class Sprite;
 class TileMap;
 class Window;
 
@@ -62,28 +63,13 @@ public:
 	void draw() const;
 
 	void draw(const std::string &text, Font &font, glm::vec2 pos, Color color);
+	void draw(const Sprite &sprite);
 	void draw(const TileMap &map);
 
 	/**
 	 * Set the texture for the next primitive.
 	 */
 	void setTexture(const Texture *texture);
-
-	/**
-	 * Blit the texture.
-	 */
-	void blitQuad(const Texture &texture,
-		      const FloatRect &textureRect,
-		      const FloatRect &dstRect,
-		      Color color);
-
-	void blitQuad(const Texture &texture,
-		      const FloatRect &textureRect,
-		      const FloatRect &dstRect,
-		      Color color,
-		      float rotationAngle,
-		      glm::vec2 offset,
-		      float scale);
 
 	/**
 	 * Use the @window as a drawing backend.

@@ -3,6 +3,7 @@
 #include "player.hpp"
 
 #include "camera.hpp"
+#include "rendertarget.hpp"
 #include "window.hpp"
 
 namespace
@@ -53,8 +54,8 @@ Player::update(Window &window, float dt)
 void
 Player::draw(RenderTarget &target)
 {
-	mBaseSprite.draw(target);
-	mTurretSprite.draw(target);
+	target.draw(mBaseSprite);
+	target.draw(mTurretSprite);
 }
 
 void

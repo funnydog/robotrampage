@@ -1,6 +1,6 @@
 #include "sprite.hpp"
 
-#include "rendertarget.hpp"
+#include "texture.hpp"
 
 Sprite::Sprite(
 	const Texture &texture,
@@ -24,6 +24,12 @@ Sprite::Sprite(
 	, mBoundingPadding(0.f)
 {
 	addFrame(initialFrame);
+}
+
+const Texture &
+Sprite::getTexture() const
+{
+	return mTexture;
 }
 
 glm::vec2
@@ -233,27 +239,5 @@ Sprite::update(float dt)
 			}
 		}
 		mLocation += mVelocity * dt;
-	}
-}
-
-void
-Sprite::draw(RenderTarget &target)
-{
-	auto srcRect = getSource();
-	auto dstRect = getDestination();
-	if (mRotation != 0.f)
-	{
-		target.blitQuad(
-			mTexture,
-			srcRect,
-			dstRect,
-			mTintColor,
-			mRotation,
-			mFrameSize * 0.5f,
-			1.f);
-	}
-	else
-	{
-		target.blitQuad(mTexture, srcRect, dstRect, mTintColor);
 	}
 }

@@ -5,6 +5,7 @@
 #include "sprite.hpp"
 
 class Camera;
+class RenderTarget;
 class Window;
 
 class Player

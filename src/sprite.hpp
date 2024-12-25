@@ -7,13 +7,14 @@
 #include "color.hpp"
 #include "rect.hpp"
 
-class RenderTarget;
 class Texture;
 
 class Sprite
 {
 public:
 	Sprite(const Texture &texture, FloatRect initialFrame, glm::vec2 location, glm::vec2 velocity);
+
+	const Texture &getTexture() const;
 
 	glm::vec2 getLocation() const;
 	void setLocation(glm::vec2 location);
@@ -62,7 +63,6 @@ public:
 	void addFrame(const FloatRect &rect);
 
 	virtual void update(float dt);
-	virtual void draw(RenderTarget &target);
 
 protected:
 	// drawable
