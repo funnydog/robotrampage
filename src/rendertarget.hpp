@@ -50,10 +50,13 @@ public:
 	 */
 	void addLayer();
 
+	void beginBatch();
+	void endBatch();
+
 	/**
 	 * Send the blob of vertices to the GPU.
 	 */
-	void draw();
+	void draw() const;
 
 	/**
 	 * Set the texture for the next primitive.
@@ -116,33 +119,24 @@ protected:
 	void initialize();
 
 private:
-	struct DrawChannel
+	struct Batch
 	{
 		const Texture *texture;
-		unsigned vtxOffset;
-		unsigned idxOffset;
-		std::vector<std::uint16_t> idxBuffer;
-		DrawChannel *next;
+		unsigned vertexOffset;
+		unsigned indexOffset;
+		unsigned indexCount;
 	};
-
-private:
-	DrawChannel *newChannel(const Texture *texture, unsigned vtxOffset);
-	void beginBatch();
-	void endBatch();
 
 private:
 	Camera mDefaultCamera;
 	const Camera *mCamera;
 
+	std::vector<Batch>         mBatches;
 	std::vector<Vertex>        mVertices;
 	std::vector<std::uint16_t> mIndices;
-	std::unordered_map<const Texture *, DrawChannel*> mChannelMap;
-
-	bool          mIsBatching;
-	DrawChannel  *mChannelList;
-	DrawChannel **mChannelTail;
-	DrawChannel  *mCurrent;
-	DrawChannel  *mFreeChannels;
+	const Texture *mTexture;
+	unsigned mVertexOffset;
+	unsigned mIndexOffset;
 
 	Texture       mWhiteTexture;
 	Shader        mShader;
@@ -157,7 +151,7 @@ RenderTarget::addIndices(std::uint16_t offset, Iterator start, Iterator end)
 {
 	for (; start != end; ++start)
 	{
-		mCurrent->idxBuffer.push_back(offset + *start);
+		mIndices.push_back(offset + *start);
 	}
 }
 

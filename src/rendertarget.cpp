@@ -23,11 +23,9 @@ static const std::uint16_t QuadIndices[] = { 0, 1, 2, 1, 3, 2 };
 
 RenderTarget::RenderTarget()
 	: mCamera(&mDefaultCamera)
-	, mIsBatching(false)
-	, mChannelList(nullptr)
-	, mChannelTail(&mChannelList)
-	, mCurrent(nullptr)
-	, mFreeChannels(nullptr)
+	, mTexture(nullptr)
+	, mVertexOffset(0)
+	, mIndexOffset(0)
 	, mVBO(0)
 	, mEBO(0)
 	, mVAO(0)
@@ -48,15 +46,6 @@ RenderTarget::~RenderTarget()
 	if (mVBO)
 	{
 		glCheck(glDeleteBuffers(1, &mVBO));
-	}
-
-	beginBatch();
-	DrawChannel *channel = mFreeChannels;
-	while (channel)
-	{
-		DrawChannel *next = channel->next;
-		delete channel;
-		channel = next;
 	}
 }
 
@@ -139,51 +128,36 @@ RenderTarget::clear(Color color)
 void
 RenderTarget::addLayer()
 {
-	// NOTE: by deleting the texture->channel association
-	// we force to build another set of channels.
-	mChannelMap.clear();
+	endBatch();
 }
 
 void
 RenderTarget::beginBatch()
 {
+	mBatches.clear();
 	mVertices.clear();
-	mChannelMap.clear();
-	*mChannelTail = mFreeChannels;
-	mFreeChannels = mChannelList;
-	mChannelList = mCurrent = nullptr;
-	mChannelTail = &mChannelList;
+	mIndices.clear();
+	mTexture = &mWhiteTexture;
+	mVertexOffset = mIndexOffset = 0;
 }
 
 void
 RenderTarget::endBatch()
 {
-	mIndices.clear();
-	for (auto channel = mChannelList; channel; channel = channel->next)
-	{
-		channel->idxOffset = mIndices.size() * sizeof(std::uint16_t);
-		mIndices.insert(mIndices.end(),
-				channel->idxBuffer.begin(),
-				channel->idxBuffer.end());
-	}
+	auto indexCount = mIndices.size();
+	mBatches.emplace_back(
+		mTexture,
+		mVertexOffset,
+		mIndexOffset,
+		indexCount-mIndexOffset);
+	mVertexOffset = mVertices.size();
+	mIndexOffset = indexCount;
 }
 
 void
-RenderTarget::draw()
+RenderTarget::draw() const
 {
 	assert(mVAO && mVBO && mEBO && "OpenGL objects not initialized.");
-	const int textureUnit = 0;
-
-	if (!mChannelList)
-	{
-		return;
-	}
-
-	if (mIsBatching)
-	{
-		mIsBatching = false;
-		endBatch();
-	}
 
 	glCheck(glBindVertexArray(mVAO));
 
@@ -199,126 +173,47 @@ RenderTarget::draw()
 			     mIndices.data(),
 			     GL_STREAM_DRAW));
 
-	const Texture *currentTexture = nullptr;
-	for (auto channel = mChannelList; channel; channel = channel->next)
+	for (const auto &batch : mBatches)
 	{
-		// skip empty channels
-		if (!channel->texture || channel->idxBuffer.empty())
-		{
-			continue;
-		}
-
-		// dont bind against the same texture
-		if (currentTexture != channel->texture)
-		{
-			currentTexture = channel->texture;
-			currentTexture->bind(textureUnit);
-		}
-
-		// draw
+		batch.texture->bind(0);
 		glCheck(glDrawElementsBaseVertex(
 				GL_TRIANGLES,
-				channel->idxBuffer.size(),
+				batch.indexCount,
 				GL_UNSIGNED_SHORT,
-				reinterpret_cast<GLvoid*>(channel->idxOffset),
-				channel->vtxOffset));
+				reinterpret_cast<GLvoid*>(batch.indexOffset * sizeof(mIndices[0])),
+				batch.vertexOffset));
 	}
-
 	glCheck(glBindVertexArray(0));
-	glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-	glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-}
-
-RenderTarget::DrawChannel *
-RenderTarget::newChannel(const Texture *texture, unsigned vtxOffset)
-{
-	DrawChannel *channel;
-	if (mFreeChannels)
-	{
-		channel = mFreeChannels;
-		channel->idxBuffer.clear();
-		mFreeChannels = channel->next;
-	}
-	else
-	{
-		channel = new DrawChannel();
-	}
-
-	// channel initialization
-	channel->texture = texture;
-	channel->vtxOffset = vtxOffset;
-	channel->idxOffset = 0;
-	channel->next = nullptr;
-
-	// update the channel list
-	*mChannelTail = channel;
-	mChannelTail = &channel->next;
-
-	return channel;
 }
 
 void
 RenderTarget::setTexture(const Texture *texture)
 {
-	// switch to batching state if needed
-	if (!mIsBatching)
-	{
-		mIsBatching = true;
-		beginBatch();
-	}
-
-	// the null texture means a white texture;
-	if (!texture)
+	if (texture == nullptr)
 	{
 		texture = &mWhiteTexture;
 	}
-
-	// return early if the texture is the same
-	if (mCurrent && mCurrent->texture == texture)
+	if (texture != mTexture && mIndices.size() > mIndexOffset)
 	{
-		return;
+		endBatch();
 	}
-
-	// look for a channel with the same texture
-	if (auto it = mChannelMap.find(texture); it != mChannelMap.end())
-	{
-		// channel found
-		mCurrent = it->second;
-	}
-	else
-	{
-		// or add a new one
-		mCurrent = newChannel(texture, mVertices.size());
-		mChannelMap[texture] = mCurrent;
-	}
+	mTexture = texture;
 }
 
 std::uint16_t
 RenderTarget::getPrimIndex(unsigned idxCount, unsigned vtxCount)
 {
-	// ensure we have a current channel and the rendertarget is in
-	// batching state.
-	if (!mIsBatching)
-	{
-		mIsBatching = true;
-		beginBatch();
-		mCurrent = newChannel(&mWhiteTexture, 0);
-	}
-
 	// ensure we have enough space for the indices
-	unsigned index = mVertices.size() - mCurrent->vtxOffset;
-	if (index + vtxCount > UINT16_MAX)
+	auto base = mVertices.size() - mVertexOffset;
+	if (base + vtxCount > UINT16_MAX)
 	{
-		mCurrent = newChannel(mCurrent->texture, mVertices.size());
-		mChannelMap[mCurrent->texture] = mCurrent;
-		index = 0;
+		endBatch();
+		base = 0;
 	}
-
 	// reserve the space for the vertices and the indices
 	mVertices.reserve(mVertices.size() + vtxCount);
-	mCurrent->idxBuffer.reserve(mCurrent->idxBuffer.size() + idxCount);
-
-	return index;
+	mIndices.reserve(mIndices.size() + idxCount);
+	return base;
 }
 
 Vertex*

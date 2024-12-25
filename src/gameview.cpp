@@ -51,8 +51,10 @@ GameView::handleEvent(const Event &)
 void
 GameView::render(RenderTarget &target)
 {
+	target.beginBatch();
 	target.clear(Color::White);
 	mTileMap.draw(target);
 	mPlayer.draw(target);
+	target.endBatch();
 	target.draw();
 }
