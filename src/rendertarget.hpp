@@ -56,6 +56,7 @@ public:
 
 	void beginBatch();
 	void endBatch();
+	void reserve(unsigned vertices, std::span<const std::uint16_t> indices);
 
 	/**
 	 * Send the blob of vertices to the GPU.
@@ -82,8 +83,6 @@ protected:
 	void initialize();
 
 private:
-	void reserve(unsigned vertices, std::span<const std::uint16_t> indices);
-
 	struct Batch
 	{
 		const Texture *texture;
@@ -102,6 +101,8 @@ private:
 	const Texture *mTexture;
 	unsigned mVertexOffset;
 	unsigned mIndexOffset;
+	unsigned mVertexCount;
+	unsigned mIndexCount;
 
 	Texture       mWhiteTexture;
 	Shader        mShader;

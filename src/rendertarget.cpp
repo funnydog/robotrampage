@@ -30,6 +30,8 @@ RenderTarget::RenderTarget()
 	, mTexture(nullptr)
 	, mVertexOffset(0)
 	, mIndexOffset(0)
+	, mVertexCount(0)
+	, mIndexCount(0)
 	, mVBO(0)
 	, mEBO(0)
 	, mVAO(0)
@@ -143,19 +145,36 @@ RenderTarget::beginBatch()
 	mIndices.clear();
 	mTexture = &mWhiteTexture;
 	mVertexOffset = mIndexOffset = 0;
+	mVertexCount = mIndexCount = 0;
 }
 
 void
 RenderTarget::endBatch()
 {
-	auto indexCount = mIndices.size();
 	mBatches.emplace_back(
 		mTexture,
 		mVertexOffset,
 		mIndexOffset,
-		indexCount-mIndexOffset);
-	mVertexOffset = mVertices.size();
-	mIndexOffset = indexCount;
+		mIndexCount-mIndexOffset);
+	mVertexOffset = mVertexCount;
+	mIndexOffset = mIndexCount;
+}
+
+void
+RenderTarget::reserve(unsigned vertices, std::span<const std::uint16_t> indices)
+{
+	auto base = mVertices.size() - mVertexOffset;
+	if (base + vertices > UINT16_MAX)
+	{
+		endBatch();
+		base = 0;
+	}
+	mVertexCount += vertices;
+	for (auto i : indices)
+	{
+		mIndices.push_back(base + i);
+	}
+	mIndexCount += indices.size();
 }
 
 void
@@ -202,21 +221,6 @@ RenderTarget::setTexture(const Texture *texture)
 		endBatch();
 	}
 	mTexture = texture;
-}
-
-void
-RenderTarget::reserve(unsigned vertices, std::span<const std::uint16_t> indices)
-{
-	auto base = mVertices.size() - mVertexOffset;
-	if (base + vertices > UINT16_MAX)
-	{
-		endBatch();
-		base = 0;
-	}
-	for (auto i : indices)
-	{
-		mIndices.push_back(base + i);
-	}
 }
 
 void
