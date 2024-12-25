@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cassert>
 
-#include "rendertarget.hpp"
+#include "texture.hpp"
 #include "tilemap.hpp"
 #include "utility.hpp"
 
@@ -129,28 +129,14 @@ TileMap::generateRandomMap()
 	}
 }
 
-void
-TileMap::draw(RenderTarget &target)
+const Texture &
+TileMap::getTexture() const
 {
-	glm::vec2 cameraStart = target.getCamera().getPosition();
-	glm::vec2 cameraEnd = cameraStart + target.getCamera().getSize();
-	glm::ivec2 start = getSquareByPixel(cameraStart);
-	glm::ivec2 end = getSquareByPixel(cameraEnd);
+	return *mTexture;
+}
 
-	glm::ivec2 cur;
-	for (cur.x = start.x; cur.x <= end.x; cur.x++)
-	{
-		for (cur.y = start.y; cur.y <= end.y; cur.y++)
-		{
-			int tile = getTileAtSquare(cur);
-			if (tile != -1)
-			{
-				target.blitQuad(
-					*mTexture,
-					mTiles[tile],
-					getSquareRectangle(cur),
-					Color::White);
-			}
-		}
-	}
+const FloatRect &
+TileMap::getTileUVRect(int tile) const
+{
+	return mTiles[tile];
 }

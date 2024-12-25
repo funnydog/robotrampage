@@ -53,7 +53,7 @@ GameView::render(RenderTarget &target)
 {
 	target.beginBatch();
 	target.clear(Color::White);
-	mTileMap.draw(target);
+	target.draw(mTileMap);
 	mPlayer.draw(target);
 	target.endBatch();
 	target.draw();

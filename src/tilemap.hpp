@@ -6,7 +6,6 @@
 
 #include "rect.hpp"
 
-class RenderTarget;
 class Texture;
 
 class TileMap
@@ -32,7 +31,8 @@ public:
 
 	void generateRandomMap();
 
-	void draw(RenderTarget &target);
+	const Texture &getTexture() const;
+	const FloatRect &getTileUVRect(int tile) const;
 
 private:
 	std::vector<int> mMap;

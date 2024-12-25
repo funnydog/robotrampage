@@ -4,10 +4,12 @@
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "rendertarget.hpp"
+
 #include "color.hpp"
 #include "font.hpp"
 #include "glcheck.hpp"
-#include "rendertarget.hpp"
+#include "tilemap.hpp"
 #include "window.hpp"
 
 namespace
@@ -243,6 +245,39 @@ RenderTarget::draw(const std::string &text, Font &font, glm::vec2 pos, Color col
 		}
 		pos.x += glyph.advance - glyph.bearing.x;
 		pos.y += glyph.bearing.y;
+	}
+}
+
+void
+RenderTarget::draw(const TileMap &map)
+{
+	glm::vec2 cameraStart = mCamera->getPosition();
+	glm::vec2 cameraEnd = cameraStart + mCamera->getSize();
+	glm::ivec2 start = map.getSquareByPixel(cameraStart);
+	glm::ivec2 end = map.getSquareByPixel(cameraEnd);
+
+	setTexture(&map.getTexture());
+	glm::ivec2 cur;
+	for (cur.x = start.x; cur.x <= end.x; cur.x++)
+	{
+		for (cur.y = start.y; cur.y <= end.y; cur.y++)
+		{
+			int tile = map.getTileAtSquare(cur);
+			if (tile == -1)
+			{
+				continue;
+			}
+			auto dstRect = map.getSquareRectangle(cur);
+			const auto &uvRect = map.getTileUVRect(tile);
+			reserve(4, QuadIndices);
+			for (auto unit : QuadUnits)
+			{
+				mVertices.emplace_back(
+					unit * dstRect.size + dstRect.pos,
+					unit * uvRect.size + uvRect.pos,
+					Color::White);
+			}
+		}
 	}
 }
 

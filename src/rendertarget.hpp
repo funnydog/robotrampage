@@ -12,6 +12,7 @@
 
 class Canvas;
 class Font;
+class TileMap;
 class Window;
 
 class RenderTarget
@@ -61,6 +62,7 @@ public:
 	void draw() const;
 
 	void draw(const std::string &text, Font &font, glm::vec2 pos, Color color);
+	void draw(const TileMap &map);
 
 	/**
 	 * Set the texture for the next primitive.
