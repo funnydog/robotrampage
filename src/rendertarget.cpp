@@ -216,30 +216,6 @@ RenderTarget::reserve(unsigned vertices, std::span<const std::uint16_t> indices)
 	}
 }
 
-std::uint16_t
-RenderTarget::getPrimIndex(unsigned idxCount, unsigned vtxCount)
-{
-	// ensure we have enough space for the indices
-	auto base = mVertices.size() - mVertexOffset;
-	if (base + vtxCount > UINT16_MAX)
-	{
-		endBatch();
-		base = 0;
-	}
-	// reserve the space for the vertices and the indices
-	mVertices.reserve(mVertices.size() + vtxCount);
-	mIndices.reserve(mIndices.size() + idxCount);
-	return base;
-}
-
-Vertex*
-RenderTarget::getVertexArray(unsigned vtxCount)
-{
-	auto size = mVertices.size();
-	mVertices.resize(size + vtxCount);
-	return &mVertices[size];
-}
-
 void
 RenderTarget::draw(const std::string &text, Font &font, glm::vec2 pos, Color color)
 {

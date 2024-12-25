@@ -68,35 +68,6 @@ public:
 	void setTexture(const Texture *texture);
 
 	/**
-	 * Get the base index for the primitive and reserve space in
-	 * the vertex and index buffers.
-	 */
-	std::uint16_t getPrimIndex(unsigned idxCount, unsigned vtxCount);
-
-	/**
-	 * Add a sequence of indices to the DrawChannel, with an
-	 * @offset applied to them. The offset is obtained by using
-	 * getPrimIndex().
-	 *
-	 * @param[in] offset offset to add to each index.
-	 * @param[in] start first iterator of the range.
-	 * @param[in] end end iterator of the range.
-	 */
-	template <typename Iterator>
-	void addIndices(std::uint16_t offset, Iterator start, Iterator end);
-
-	/**
-	 * Add a sequence of vertices to the DrawChannel.
-	 *
-	 * @param[in] start first iterator of the range.
-	 * @param[in] end end iterator of the range.
-	 */
-	template <typename Iterator>
-	void addVertices(Iterator start, Iterator end);
-
-	Vertex* getVertexArray(unsigned vtxCount);
-
-	/**
 	 * Blit the texture.
 	 */
 	void blitQuad(const Texture &texture,
@@ -150,20 +121,3 @@ private:
 	unsigned      mEBO;
 	unsigned      mVAO;
 };
-
-template <typename Iterator>
-void
-RenderTarget::addIndices(std::uint16_t offset, Iterator start, Iterator end)
-{
-	for (; start != end; ++start)
-	{
-		mIndices.push_back(offset + *start);
-	}
-}
-
-template <typename Iterator>
-void
-RenderTarget::addVertices(Iterator start, Iterator end)
-{
-	mVertices.insert(mVertices.end(), start, end);
-}
