@@ -2,49 +2,38 @@
 
 #include <filesystem>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <al.h>
+#include <alc.h>
 
-#include "alcheck.hpp"
+#include "resources.hpp"
 
 class AudioDevice
 {
 public:
-	static std::vector<std::string> enumerateDevices();
-
-public:
-	explicit AudioDevice(const std::string &name = "");
+	explicit AudioDevice();
 	~AudioDevice();
 
-	bool isOpen() const;
+	static std::vector<std::string> enumerate();
+
 	bool open(const std::string &name);
 	void close();
-	void bind() const;
 
-	bool isSupported(const std::string &extension) const;
+	float getMasterVolume() const;
+	void setMasterVolume(float value);
 
-	float getGlobalVolume() const;
-	void setGlobalVolume(float volume);
+	void play(SoundID id);
+	void update();
 
-	glm::vec3 getPosition() const;
-	void setPosition(glm::vec3 position);
-
-	glm::vec3 getDirection() const;
-	void setDirection(glm::vec3 direction);
-
-	glm::vec3 getUpVector() const;
-	void setUpVector(glm::vec3 upVector);
+	bool load(SoundID id, const std::filesystem::path &path);
 
 private:
-	void applyOrientation();
-
-private:
-	ALCdevice  *mAudioDevice;
+	ALCdevice *mAudioDevice;
 	ALCcontext *mAudioContext;
-
-	float mVolume;
-	glm::vec3 mPosition;
-	glm::vec3 mDirection;
-	glm::vec3 mUpVector;
+	float mMasterVolume;
+	std::vector<unsigned> mStoppedSources;
+	std::vector<unsigned> mPlayingSources;
+	std::unordered_map<SoundID, unsigned> mBuffers;
 };

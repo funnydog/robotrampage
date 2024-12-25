@@ -13,7 +13,6 @@ class RenderTarget;
 struct Context
 {
 	AudioDevice   *audio;
-	SoundPlayer   *player;
 	Window        *window;
 	RenderTarget  *target;
 	FontHolder    *fonts;

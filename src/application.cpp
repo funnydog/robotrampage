@@ -22,12 +22,10 @@ Application::Application()
 	, mWindow()
 	, mRenderTarget()
 	, mAudioDevice()
-	, mSoundPlayer(mAudioDevice)
 	, mFonts()
 	, mTextures()
 	, mViewStack({
 			&mAudioDevice,
-			&mSoundPlayer,
 			&mWindow,
 			&mRenderTarget,
 			&mFonts,
@@ -44,6 +42,12 @@ Application::Application()
 	mWindow.open("RobotRampage", ScreenWidth, ScreenHeight);
 	mEventQueue.track(mWindow);
 	mRenderTarget.use(mWindow);
+
+	if (!mAudioDevice.open(""))
+	{
+		throw std::runtime_error("Cannot open the audio device");
+	}
+	mAudioDevice.setMasterVolume(30.f);
 
 	loadAssets();
 	registerViews();

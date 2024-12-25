@@ -6,7 +6,6 @@
 #include "rendertarget.hpp"
 #include "resourceholder.hpp"
 #include "resources.hpp"
-#include "soundplayer.hpp"
 #include "texture.hpp"
 #include "viewstack.hpp"
 #include "window.hpp"
@@ -29,7 +28,6 @@ private:
 	Window mWindow;
 	RenderTarget mRenderTarget;
 	AudioDevice mAudioDevice;
-	SoundPlayer mSoundPlayer;
 	FontHolder mFonts;
 	TextureHolder mTextures;
 	ViewStack mViewStack;

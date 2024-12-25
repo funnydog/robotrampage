@@ -30,13 +30,6 @@ srcs = [
 
   # audio
   'audiodevice.cpp',
-  'soundfile.cpp',
-  'soundfilewav.cpp',
-  'soundfileogg.cpp',
-  'soundbuffer.cpp',
-  'soundsource.cpp',
-  'sound.cpp',
-  'soundplayer.cpp',
 
   # utilities / third party
   'alcheck.cpp',
