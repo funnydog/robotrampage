@@ -1,5 +1,6 @@
 #pragma once
 
+#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -119,6 +120,8 @@ protected:
 	void initialize();
 
 private:
+	void reserve(unsigned vertices, std::span<const std::uint16_t> indices);
+
 	struct Batch
 	{
 		const Texture *texture;

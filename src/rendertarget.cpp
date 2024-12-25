@@ -200,6 +200,21 @@ RenderTarget::setTexture(const Texture *texture)
 	mTexture = texture;
 }
 
+void
+RenderTarget::reserve(unsigned vertices, std::span<const std::uint16_t> indices)
+{
+	auto base = mVertices.size() - mVertexOffset;
+	if (base + vertices > UINT16_MAX)
+	{
+		endBatch();
+		base = 0;
+	}
+	for (auto i : indices)
+	{
+		mIndices.push_back(base + i);
+	}
+}
+
 std::uint16_t
 RenderTarget::getPrimIndex(unsigned idxCount, unsigned vtxCount)
 {
@@ -225,37 +240,33 @@ RenderTarget::getVertexArray(unsigned vtxCount)
 }
 
 void
-RenderTarget::blitQuad(
-	const Texture &texture,
-	const FloatRect &srcRect,
-	const FloatRect &dstRect,
-	Color color)
+RenderTarget::blitQuad(const Texture &texture,
+                       const FloatRect &srcRect,
+                       const FloatRect &dstRect,
+                       Color color)
 {
-	if (!mCamera->isVisible(dstRect))
+	if (mCamera->isVisible(dstRect))
 	{
-		return;
-	}
-	setTexture(&texture);
-	auto base = getPrimIndex(6, 4);
-	addIndices(base, QuadIndices + 0, QuadIndices + 6);
-	auto vertices = getVertexArray(4);
-	for (int i = 0; i < 4; i++)
-	{
-		vertices[i].pos = QuadUnits[i] * dstRect.size + dstRect.pos;
-		vertices[i].uv = QuadUnits[i] * srcRect.size + srcRect.pos;
-		vertices[i].color = color;
+		setTexture(&texture);
+		reserve(4, QuadIndices);
+		for (auto unit : QuadUnits)
+		{
+			mVertices.emplace_back(
+				unit * dstRect.size + dstRect.pos,
+				unit * srcRect.size + srcRect.pos,
+				color);
+		}
 	}
 }
 
 void
-RenderTarget::blitQuad(
-	const Texture &texture,
-	const FloatRect &srcRect,
-	const FloatRect &dstRect,
-	Color color,
-	float rotationAngle,
-	glm::vec2 offset,
-	float scale)
+RenderTarget::blitQuad(const Texture &texture,
+                       const FloatRect &srcRect,
+                       const FloatRect &dstRect,
+                       Color color,
+                       float rotationAngle,
+                       glm::vec2 offset,
+                       float scale)
 {
 	auto mat4 = glm::translate(
 		glm::rotate(
@@ -269,15 +280,13 @@ RenderTarget::blitQuad(
 		glm::vec3(-offset, 0.f));
 
 	setTexture(&texture);
-	auto base = getPrimIndex(6, 4);
-	addIndices(base, QuadIndices + 0, QuadIndices + 6);
-	auto vertices = getVertexArray(4);
-	for (int i = 0; i < 4; i++)
+	reserve(4, QuadIndices);
+	for (auto unit : QuadUnits)
 	{
-		vertices[i].pos = glm::vec2(
-			mat4 * glm::vec4(
-				QuadUnits[i] * dstRect.size, 0.f, 1.f)) + dstRect.pos;
-		vertices[i].uv = QuadUnits[i] * srcRect.size + srcRect.pos;
-		vertices[i].color = color;
+		mVertices.emplace_back(
+			glm::vec2(
+				mat4 * glm::vec4(unit * dstRect.size, 0.f, 1.f)) + dstRect.pos,
+			unit * srcRect.size + srcRect.pos,
+			color);
 	}
 }
