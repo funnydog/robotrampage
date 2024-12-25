@@ -1,20 +1,10 @@
-freetype2 = dependency('freetype2')
-gl = dependency('gl')
-glm = dependency('glm')
-glew = dependency('glew')
-glfw3 = dependency('glfw3')
-openal = dependency('openal')
-vorbisfile = dependency('vorbisfile')
-
-deps = [
-  freetype2,
-  gl,
-  glm,
-  glew,
-  glfw3,
-  openal,
-  vorbisfile,
-]
+deps = []
+deps += dependency('freetype2', required : true, fallback : ['freetype2', 'freetype_dep'])
+deps += dependency('glew', required : true, fallback : ['glew', 'glew_dep'])
+deps += dependency('glfw3', required : true, fallback : ['glfw', 'glfw_dep'])
+deps += dependency('glm', required : true, fallback : ['glm', 'glm_dep'])
+deps += dependency('openal', required : true, fallback : ['openal-soft', 'openal_dep'])
+deps += dependency('vorbisfile')
 
 srcs = [
   'robotrampage.cpp',
