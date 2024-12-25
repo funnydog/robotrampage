@@ -37,7 +37,7 @@ public:
 	bool isSmooth() const;
 	void setSmooth(bool smooth);
 
-	static void bind(const Texture *texture, int textureUnit) noexcept;
+	void bind(int textureUnit) const noexcept;
 
 private:
 	unsigned mTexture;
