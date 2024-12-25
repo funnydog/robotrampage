@@ -90,9 +90,13 @@ void
 RenderTarget::use(const Window &window)
 {
 	mWhiteTexture.create(1, 1, &Color::White);
-	mShader.attach(vertexShader, ShaderType::Vertex);
-	mShader.attach(fragmentShader, ShaderType::Fragment);
-	mShader.link();
+	mShader.create();
+	if (!mShader.attachString(Shader::Type::Vertex, vertexShader)
+	    || !mShader.attachString(Shader::Type::Fragment, fragmentShader)
+	    || !mShader.link())
+	{
+		throw std::runtime_error("Cannot compile the shader");
+	}
 
 	glm::vec2 size = window.getSize();
 	mDefaultCamera.setPosition({0.f, 0.f});
@@ -184,12 +188,9 @@ RenderTarget::draw()
 
 	glCheck(glBindVertexArray(mVAO));
 
-	Shader::bind(&mShader);
-	ShaderUniform projection = mShader.getUniform("Projection");
-	ShaderUniform sampler = mShader.getUniform("Texture");
-
-	sampler.set(textureUnit);
-	projection.set(mCamera->getTransform());
+	mShader.use();
+	mShader.getUniform("Projection").setMatrix4(mCamera->getTransform());
+	mShader.getUniform("Texture").setInteger(textureUnit);
 
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, mVBO));
 	glCheck(glBufferData(GL_ARRAY_BUFFER,
@@ -247,8 +248,6 @@ RenderTarget::draw()
 
 	glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-
-	Shader::bind(nullptr);
 
 	glCheck(glBindVertexArray(0));
 }
