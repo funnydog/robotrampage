@@ -11,32 +11,6 @@
 
 namespace
 {
-const char *vertexShader =
-	"\n#version 330 core"
-	"\nlayout (location = 0) in vec2 Position;"
-	"\nlayout (location = 1) in vec2 UV;"
-	"\nlayout (location = 2) in vec4 Color;"
-	"\nuniform mat4 Projection;"
-	"\nout vec2 FragUV;"
-	"\nout vec4 FragColor;"
-	"\nvoid main()"
-	"\n{"
-	"\n	FragUV = UV;"
-	"\n	FragColor = Color;"
-	"\n	gl_Position = Projection * vec4(Position, 0, 1);"
-	"\n}";
-
-const char *fragmentShader =
-	"\n#version 330 core"
-	"\nin vec2 FragUV;"
-	"\nin vec4 FragColor;"
-	"\nuniform sampler2D Texture;"
-	"\nlayout (location = 0) out vec4 OutColor;"
-	"\nvoid main()"
-	"\n{"
-	"\n	OutColor = FragColor * texture(Texture, FragUV.st);"
-	"\n}";
-
 static const glm::vec2 QuadUnits[4] = {
 	{ 0.f, 0.f },
 	{ 0.f, 1.f },
@@ -91,8 +65,8 @@ RenderTarget::use(const Window &window)
 {
 	mWhiteTexture.create(1, 1, &Color::White);
 	mShader.create();
-	if (!mShader.attachString(Shader::Type::Vertex, vertexShader)
-	    || !mShader.attachString(Shader::Type::Fragment, fragmentShader)
+	if (!mShader.attachFile(Shader::Type::Vertex, "assets/shaders/pos_uv_color.vs")
+	    || !mShader.attachFile(Shader::Type::Fragment, "assets/shaders/uv_color.fs")
 	    || !mShader.link())
 	{
 		throw std::runtime_error("Cannot compile the shader");
@@ -102,6 +76,10 @@ RenderTarget::use(const Window &window)
 	mDefaultCamera.setPosition({0.f, 0.f});
 	mDefaultCamera.setSize(size);
 	mCamera = &mDefaultCamera;
+
+	mShader.use();
+	mShader.getUniform("projection").setMatrix4(mCamera->getTransform());
+	mShader.getUniform("image").setInteger(0);
 
 	glCheck(glEnable(GL_CULL_FACE));
 	glCheck(glEnable(GL_BLEND));
@@ -187,10 +165,6 @@ RenderTarget::draw()
 	}
 
 	glCheck(glBindVertexArray(mVAO));
-
-	mShader.use();
-	mShader.getUniform("Projection").setMatrix4(mCamera->getTransform());
-	mShader.getUniform("Texture").setInteger(textureUnit);
 
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, mVBO));
 	glCheck(glBufferData(GL_ARRAY_BUFFER,
