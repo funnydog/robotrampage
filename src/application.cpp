@@ -97,25 +97,19 @@ Application::processInput()
 void
 Application::run()
 {
-	const std::uint64_t deltaTicks = glfwGetTimerFrequency() / targetFPS;
-	std::uint64_t currentTicks = glfwGetTimerValue();
-	std::uint64_t accumulator = 0;
-	while (!mWindow.isClosed())
+	// variable-time game loop
+	auto currentTime = glfwGetTime();
+	while (!mWindow.isClosed() && !mViewStack.empty())
 	{
-		auto newTicks = glfwGetTimerValue();
-		accumulator += newTicks - currentTicks;
-		currentTicks = newTicks;
+		auto newTime = glfwGetTime();
+		auto frameTime = newTime - currentTime;
+		currentTime = newTime;
 
-		int steps = MaxStepsPerFrame;
-		while (steps-->0 && accumulator >= deltaTicks)
-		{
-			accumulator -= deltaTicks;
+		processInput();
+		mViewStack.update(frameTime);
+		mAudioDevice.update();
 
-			processInput();
-
-			mViewStack.update(SecondsPerFrame);
-		}
-
+		// render
 		mViewStack.render(mRenderTarget);
 		mWindow.display();
 	}
