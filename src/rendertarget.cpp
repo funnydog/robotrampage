@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "color.hpp"
+#include "font.hpp"
 #include "glcheck.hpp"
 #include "rendertarget.hpp"
 #include "window.hpp"
@@ -237,6 +238,36 @@ RenderTarget::getVertexArray(unsigned vtxCount)
 	auto size = mVertices.size();
 	mVertices.resize(size + vtxCount);
 	return &mVertices[size];
+}
+
+void
+RenderTarget::draw(const std::string &text, Font &font, glm::vec2 pos, Color color)
+{
+	if (text.empty())
+	{
+		return;
+	}
+
+	setTexture(&font.getTexture());
+	pos.y += font.getLineHeight();
+	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
+	for (auto codepoint : cv.from_bytes(text))
+	{
+		reserve(4, QuadIndices);
+
+		const auto &glyph = font.getGlyph(codepoint);
+		pos.x += glyph.bearing.x;
+		pos.y -= glyph.bearing.y;
+		for (auto unit : QuadUnits)
+		{
+			mVertices.emplace_back(
+				glyph.size * unit + pos,
+				glyph.uvSize * unit + glyph.uvPos,
+				color);
+		}
+		pos.x += glyph.advance - glyph.bearing.x;
+		pos.y += glyph.bearing.y;
+	}
 }
 
 void

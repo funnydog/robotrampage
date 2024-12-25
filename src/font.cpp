@@ -29,7 +29,7 @@ roundUp2(unsigned v)
 Font::Font()
 	: mFT(nullptr)
 	, mFace(nullptr)
-	, mLineHeight(0)
+	, mLineHeight(0.f)
 	, mPositionX(0)
 	, mPositionY(0)
 	, mMaxHeight(0)
@@ -62,102 +62,11 @@ Font::loadFromFile(const std::filesystem::path &path, unsigned size)
 	}
 	FT_Set_Pixel_Sizes(mFace, 0, size);
 
-	mLineHeight = static_cast<int>((mFace->size->metrics.ascender -
-					mFace->size->metrics.descender) >> 6);
+	mLineHeight = (mFace->size->metrics.ascender-mFace->size->metrics.descender)  / 64.f;
 	mGlyphs.clear();
 	mPositionX = mPositionY = mMaxHeight = 0;
 
 	return true;
-}
-
-void
-Font::draw(RenderTarget &target, glm::vec2 pos, const std::string &text, Color color) const
-{
-	if (text.empty())
-	{
-		return;
-	}
-
-	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
-	for (auto codepoint: cv.from_bytes(text))
-	{
-		getGlyph(codepoint);
-	}
-
-	static const std::uint16_t indices[] = { 0, 1, 2, 1, 3, 2 };
-	static const glm::vec2 unit[] = {
-		{ 0.f, 0.f },
-		{ 0.f, 1.f },
-		{ 1.f, 0.f },
-		{ 1.f, 1.f },
-	};
-	target.setTexture(&mTexture);
-	pos.y += mLineHeight;
-	for (auto codepoint: cv.from_bytes(text))
-	{
-		unsigned base = target.getPrimIndex(6, 4);
-		target.addIndices(base, indices + 0, indices + 6);
-		Vertex *vertices = target.getVertexArray(4);
-
-		const auto &glyph = getGlyph(codepoint);
-		pos.x += glyph.bearing.x;
-		pos.y -= glyph.bearing.y;
-		for (int i = 0; i < 4; i++)
-		{
-			vertices[i].pos = glyph.size * unit[i] + pos;
-			vertices[i].uv = glyph.uvSize * unit[i] + glyph.uvPos;
-			vertices[i].color = color;
-		}
-		pos.x += glyph.advance - glyph.bearing.x;
-		pos.y += glyph.bearing.y;
-	}
-}
-
-void
-Font::draw(RenderTarget &target, const glm::mat4 &transform,
-	   const std::string &text, Color color) const
-{
-	if (text.empty())
-	{
-		return;
-	}
-
-	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
-	for (auto codepoint: cv.from_bytes(text))
-	{
-		getGlyph(codepoint);
-	}
-
-	static const std::uint16_t indices[] = { 0, 1, 2, 1, 3, 2 };
-	static const glm::vec2 unit[] = {
-		{ 0.f, 0.f },
-		{ 0.f, 1.f },
-		{ 1.f, 0.f },
-		{ 1.f, 1.f },
-	};
-	target.setTexture(&mTexture);
-	glm::vec2 pos(0.f);
-
-	pos.y += mLineHeight;
-	for (auto codepoint: cv.from_bytes(text))
-	{
-		unsigned base = target.getPrimIndex(6, 4);
-		target.addIndices(base, indices + 0, indices + 6);
-		auto vertices = target.getVertexArray(4);
-
-		const auto &glyph = getGlyph(codepoint);
-		pos.x += glyph.bearing.x;
-		pos.y -= glyph.bearing.y;
-		for (int i = 0; i < 4; i++)
-		{
-			vertices[i].pos = glm::vec2(
-				transform * glm::vec4(glyph.size * unit[i] + pos, 0.f, 1.f));
-			vertices[i].uv = glyph.uvSize * unit[i] + glyph.uvPos;
-			vertices[i].color = color;
-		}
-		pos.x += glyph.advance - glyph.bearing.x;
-		pos.y += glyph.bearing.y;
-	}
 }
 
 glm::vec2
@@ -176,6 +85,12 @@ Font::getSize(const std::string &text) const
 		width += glyph.advance;
 	}
 	return { width, height };
+}
+
+float
+Font::getLineHeight() const
+{
+	return mLineHeight;
 }
 
 const Texture&

@@ -11,6 +11,7 @@
 #include "camera.hpp"
 
 class Canvas;
+class Font;
 class Window;
 
 class RenderTarget
@@ -58,6 +59,8 @@ public:
 	 * Send the blob of vertices to the GPU.
 	 */
 	void draw() const;
+
+	void draw(const std::string &text, Font &font, glm::vec2 pos, Color color);
 
 	/**
 	 * Set the texture for the next primitive.
