@@ -84,9 +84,30 @@ RenderTarget::use(const Window &window)
 	glCheck(glEnable(GL_CULL_FACE));
 	glCheck(glEnable(GL_BLEND));
 	glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	glCheck(glGenVertexArrays(1, &mVAO));
-	glCheck(glGenBuffers(1, &mVBO));
+
+	// allocate the EBO and VBO
 	glCheck(glGenBuffers(1, &mEBO));
+	glCheck(glGenBuffers(1, &mVBO));
+	glCheck(glBindBuffer(GL_ARRAY_BUFFER, mVBO));
+
+	// allocate and configure the VAO
+	glCheck(glGenVertexArrays(1, &mVAO));
+	glCheck(glBindVertexArray(mVAO));
+		glCheck(glEnableVertexAttribArray(0));
+	glCheck(glVertexAttribPointer(
+			0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+			reinterpret_cast<GLvoid*>(offsetof(Vertex, pos))));
+	glCheck(glEnableVertexAttribArray(1));
+	glCheck(glVertexAttribPointer(
+			1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+			reinterpret_cast<GLvoid*>(offsetof(Vertex, uv))));
+	glCheck(glEnableVertexAttribArray(2));
+	glCheck(glVertexAttribPointer(
+			2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex),
+			reinterpret_cast<GLvoid*>(offsetof(Vertex, color))));
+
+	glCheck(glBindVertexArray(0));
+	glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
 }
 
 const Camera&
@@ -178,19 +199,6 @@ RenderTarget::draw()
 			     mIndices.data(),
 			     GL_STREAM_DRAW));
 
-	glCheck(glEnableVertexAttribArray(0));
-	glCheck(glVertexAttribPointer(
-			0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-			reinterpret_cast<GLvoid*>(offsetof(Vertex, pos))));
-	glCheck(glEnableVertexAttribArray(1));
-	glCheck(glVertexAttribPointer(
-			1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-			reinterpret_cast<GLvoid*>(offsetof(Vertex, uv))));
-	glCheck(glEnableVertexAttribArray(2));
-	glCheck(glVertexAttribPointer(
-			2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex),
-			reinterpret_cast<GLvoid*>(offsetof(Vertex, color))));
-
 	const Texture *currentTexture = nullptr;
 	for (auto channel = mChannelList; channel; channel = channel->next)
 	{
@@ -216,14 +224,9 @@ RenderTarget::draw()
 				channel->vtxOffset));
 	}
 
-	glCheck(glDisableVertexAttribArray(2));
-	glCheck(glDisableVertexAttribArray(1));
-	glCheck(glDisableVertexAttribArray(0));
-
+	glCheck(glBindVertexArray(0));
 	glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
-
-	glCheck(glBindVertexArray(0));
 }
 
 RenderTarget::DrawChannel *
