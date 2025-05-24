@@ -59,6 +59,7 @@ Application::Application()
 
 Application::~Application()
 {
+	mTextures.destroy();
 	glfwTerminate();
 }
 
