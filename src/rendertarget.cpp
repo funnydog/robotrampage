@@ -11,6 +11,7 @@
 #include "glcheck.hpp"
 #include "sprite.hpp"
 #include "tilemap.hpp"
+#include "utility.hpp"
 #include "window.hpp"
 
 namespace
@@ -233,8 +234,8 @@ RenderTarget::draw(const std::string &text, Font &font, glm::vec2 pos, Color col
 
 	setTexture(&font.getTexture());
 	pos.y += font.getLineHeight();
-	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cv;
-	for (auto codepoint : cv.from_bytes(text))
+	auto codepoints = Utility::decodeUTF8(text);
+	for (auto codepoint : codepoints)
 	{
 		reserve(4, QuadIndices);
 
